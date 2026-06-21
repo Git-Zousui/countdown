@@ -26,7 +26,7 @@
             position: relative;
         }
 
-        /* 📸 背景スライドショー用のスタイル */
+        /* 📸 背景スライドショー */
         #bg-slideshow {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -39,7 +39,7 @@
             background-position: center;
             background-repeat: no-repeat;
             opacity: 0;
-            transition: opacity 1.5s ease-in-out; /* ふわっと1.5秒で切り替え */
+            transition: opacity 1.5s ease-in-out;
             z-index: -1;
         }
         .bg-slide.active {
@@ -47,38 +47,64 @@
             z-index: 0;
         }
 
-        /* 🤍 画面下部のコンテナをミニマルに調整 */
+        /* 🤍 画面下部のコンテナ */
         .container { 
             text-align: center; 
-            background: rgba(255, 255, 255, 0.65); 
-            padding: 20px 20px; /* 上下の余白を狭くしてスリムに */
-            border-radius: 20px; 
-            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.08); 
-            width: 82%; 
-            max-width: 330px; 
-            margin-bottom: 30px; /* 位置を少し下げて写真を広く見せる */
-            backdrop-filter: blur(10px); 
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.7); 
+            padding: 18px 16px; 
+            border-radius: 24px; 
+            box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.08); 
+            width: 86%; 
+            max-width: 340px; 
+            margin-bottom: 30px; 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
             z-index: 10;
             position: relative;
         }
 
-        .title-text { font-size: 0.85rem; font-weight: 500; letter-spacing: 0.5px; }
+        /* 🗺️ 時差・時計エリア */
+        .clocks-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 8px;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            padding-bottom: 8px;
+        }
+        .clock-box { flex: 1; }
+        .clock-label { font-size: 0.65rem; color: #777; font-weight: bold; margin-bottom: 2px; }
+        .clock-time { font-size: 0.95rem; font-weight: 700; color: #333; }
 
-        /* 🌟 カウント部分（？や数字）のサイズを小さく調整 */
-        .days-box { font-size: 4rem; /* 5remから4remに縮小 */ font-weight: 800; color: var(--accent-color); line-height: 1.1; margin: 5px 0; }
+        /* 💡 ランダムメッセージエリア */
+        .message-area {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #555;
+            min-height: 1.2rem;
+            margin-bottom: 10px;
+            padding: 0 5px;
+            line-height: 1.4;
+        }
+
+        .title-text { font-size: 0.8rem; font-weight: 500; color: #666; letter-spacing: 0.5px; }
+
+        /* ⏳ リアルタイムカウントダウン */
+        .days-box { font-size: 2rem; font-weight: 800; color: var(--accent-color); line-height: 1.2; margin: 4px 0 10px 0; }
         .unit { font-size: 1.2rem; font-weight: 600; color: var(--text-color); }
         
-        .target-date { font-size: 0.75rem; color: #555; margin-bottom: 12px; font-weight: 500; line-height: 1.3; }
+        .target-date { font-size: 0.7rem; color: #777; margin-bottom: 10px; font-weight: 500; }
         
-        /* ボタン類も全体的に小ぶりに調整 */
-        button { background: #ff922b; border: none; padding: 8px 16px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin: 3px; font-size: 0.8rem; transition: background 0.2s; }
+        /* ⚙️ 入力欄・ボタンのスタイル */
+        .settings-wrapper { margin-top: 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .input-group { display: flex; gap: 4px; justify-content: center; width: 100%; }
+        input[type="date"], input[type="text"] { padding: 5px 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.85rem; color: var(--text-color); outline: none; text-align: center; box-sizing: border-box; }
+        input[type="text"] { width: 48%; }
+        
+        button { background: #ff922b; border: none; padding: 6px 14px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin: 2px; font-size: 0.75rem; transition: background 0.2s; }
         button:active { background: #f76707; }
-        .date-picker-wrapper { margin-top: 8px; }
-        input[type="date"] { padding: 6px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.9rem; color: var(--text-color); outline: none; }
         
         #image-input { display: none; }
-        .sub-btn { background: #8e8e93; font-size: 0.7rem; padding: 5px 10px; }
+        .sub-btn { background: #8e8e93; font-size: 0.65rem; padding: 4px 10px; display: inline-block; }
         .sub-btn:active { background: #636366; }
     </style>
 </head>
@@ -93,15 +119,40 @@
 </div>
 
 <div class="container">
-    <div class="title-text">会えるまで</div>
-    <div class="days-box"><span id="days-count">?</span><span class="unit" id="days-unit" style="display:none;">日</span></div>
-    <div class="target-date" id="target-date-display">下の手続きから設定してね！</div>
-    <div class="date-picker-wrapper"><input type="date" id="date-input" style="display:none;"></div>
+    <div class="clocks-container">
+        <div class="clock-box">
+            <div class="clock-label">TOKYO 🇯🇵</div>
+            <div class="clock-time" id="clock-tokyo">00:00</div>
+        </div>
+        <div class="clock-box" style="border-left: 1px solid rgba(0,0,0,0.06);">
+            <div class="clock-label">LONDON 🇬🇧</div>
+            <div class="clock-time" id="clock-london">00:00</div>
+        </div>
+    </div>
+
+    <div class="message-area" id="random-message">✨</div>
+
+    <div class="title-text" id="app-title">会えるまで</div>
     
-    <button id="setup-btn" onclick="toggleDatePicker()">日付を設定する</button>
+    <div class="days-box" id="countdown-fluid">?-日 --:--:--</div>
     
-    <div style="margin-top: 10px;">
-        <label for="image-input" class="sub-btn" style="color:white; font-weight:bold; border-radius:20px; padding:5px 10px; cursor:pointer; background:#8e8e93; font-size:0.7rem;">背景画像を複数選ぶ</label>
+    <div class="target-date" id="target-date-display">設定から名前と日付を入力してね！</div>
+    
+    <div class="settings-wrapper">
+        <div id="settings-inputs" style="display:none; width: 100%;">
+            <div class="input-group" style="margin-bottom: 6px;">
+                <input type="text" id="boyfriend-name-input" placeholder="彼氏の名前">
+                <input type="text" id="girlfriend-name-input" placeholder="彼女の名前">
+            </div>
+            <div class="input-group">
+                <input type="date" id="date-input">
+            </div>
+        </div>
+        <button id="setup-btn" onclick="toggleSettings()">設定を開く</button>
+    </div>
+    
+    <div style="margin-top: 8px;">
+        <label for="image-input" class="sub-btn" style="color:white; font-weight:bold; border-radius:20px; cursor:pointer; background:#8e8e93;">背景画像を複数選ぶ</label>
         <input type="file" id="image-input" accept="image/*" multiple onchange="loadImages(event)">
     </div>
 </div>
@@ -110,9 +161,12 @@
 
 <script>
     var targetDateStr = localStorage.getItem('meetTargetDate'); 
+    // 🌟 彼氏と彼女の名前の保存（初期値：彼氏 / 彼女）
+    var boyfriendName = localStorage.getItem('boyfriendName') || '彼氏';
+    var girlfriendName = localStorage.getItem('girlfriendName') || '彼女';
     var audioStarted = false;
     
-    // スライドショーの読み込み処理
+    // スライドショー設定
     var savedImagesJSON = localStorage.getItem('bgImagesSlideshow');
     var bgImages = [];
     if (savedImagesJSON) {
@@ -120,15 +174,89 @@
     }
     var currentSlideIndex = 0;
     var slideElements = [
-        document.getElementById('slide-0'),
-        document.getElementById('slide-1'),
-        document.getElementById('slide-2'),
-        document.getElementById('slide-3'),
+        document.getElementById('slide-0'), document.getElementById('slide-1'),
+        document.getElementById('slide-2'), document.getElementById('slide-3'),
         document.getElementById('slide-4')
     ];
     var slideshowInterval;
 
-    // 🌟 自動再生ブロックを回避して音楽を流す関数
+    // 🌟 メッセージリスト（「{boy}」に彼氏の名前、「{girl}」に彼女の名前が自動挿入されます）
+    var mondayMessages = [
+        "新しい一週間が始まったね。無理せずマイペースにいこう！☕️",
+        "{girl}、大好きだよ☺️",
+        "不安なことは一緒に乗り越えよう！",
+        "{girl}、可愛い！",
+        "辛いことがあったら、遠慮せず話してね。一緒に悩もう！",
+        "月曜日お疲れ様！{girl}に会える日にまた一歩近づいた！"
+    ];
+    var tuesdayMessages = [
+        "{girl}、火曜日もお疲れ様！ロンドンの{girl}は今何時かな？📮",
+        "{girl}、大好きだよ☺️",
+        "色々一緒に乗り越えよう！",
+        "今日も一日よく頑張りました！{girl}へハグを送るね🫂",
+        "{girl}は十分頑張ってる！たまにはサボっちゃえ笑"
+    ];
+    var wednesdayMessages = [
+        "水曜日、一週間の折り返しだね！あと半分一緒に頑張ろう！",
+        "{girl}、大好き☺️",
+        "{girl}、可愛い！",
+        "お仕事お疲れ様。ゆっくり休んでね💤"
+    ];
+    var thursdayMessages = [
+        "木曜日お疲れ様！あと少しで週末だね、{boy}。ワクワク✨",
+        "{girl}、大好き過ぎる☺️",
+        "{girl}、可愛い！",
+        "辛いことがあったら、遠慮せず話してね。一緒に悩もう！"
+        "いつも一生懸命頑張る{girl}のこと、本当に尊敬してるよ。"
+    ];
+    var fridayMessages = [
+        "{girl}、金曜日お疲れ様！TGIF！本当に頑張ったね🎉",
+        "{girl}、大好き〜☺️",
+        "飲み過ぎには注意だよ〜。俺も気をつけます！！",
+        "卑しい男は近づけません！ｼｯｼｯ🧹",
+        "今週も仕事やりきった！お疲れ様！"
+    ];
+    var weekendMessages = [
+        "素敵な週末になりますように！お出かけ楽しんでね🌿",
+        "ゆっくり休めてる？{girl}と一緒に今週もリフレッシュしよう💤",
+        "離れていても、俺と{girl}の心はいつも一緒だよ！",
+        "お先に月曜日迎えとくね😔"
+    ];
+
+    // 曜日と名前を考慮してメッセージをセットする関数
+    function setRandomMessage() {
+        var now = new Date();
+        var dayOfWeek = now.getDay(); 
+        var messageList;
+        
+        switch(dayOfWeek) {
+            case 1: messageList = mondayMessages; break;
+            case 2: messageList = tuesdayMessages; break;
+            case 3: messageList = wednesdayMessages; break;
+            case 4: messageList = thursdayMessages; break;
+            case 5: messageList = fridayMessages; break;
+            default: messageList = weekendMessages; break;
+        }
+        
+        var randomIndex = Math.floor(Math.random() * messageList.length);
+        var rawMessage = messageList[randomIndex];
+        
+        // 🌟 メッセージ内のタグを入力された名前に一括置換
+        var formattedMessage = rawMessage.replace(/{boy}/g, boyfriendName).replace(/{girl}/g, girlfriendName);
+        document.getElementById('random-message').innerText = formattedMessage;
+        
+        // アプリのメインタイトルも彼女の名前に自動連動
+        document.getElementById('app-title').innerText = girlfriendName + "に会えるまで";
+    }
+
+    function updateClocks() {
+        var now = new Date();
+        var optionsTokyo = { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit', hour12: false };
+        document.getElementById('clock-tokyo').innerText = now.toLocaleTimeString('ja-JP', optionsTokyo);
+        var optionsLondon = { timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit', hour12: false };
+        document.getElementById('clock-london').innerText = now.toLocaleTimeString('ja-JP', optionsLondon);
+    }
+
     function initAudio() {
         if (audioStarted) return;
         var bgm = document.getElementById('bgm');
@@ -139,10 +267,8 @@
         });
     }
 
-    // スライドショーの制御
     function startSlideshow() {
         if (bgImages.length === 0) return;
-        
         for (var i = 0; i < slideElements.length; i++) {
             if (i < bgImages.length) {
                 slideElements[i].style.backgroundImage = "url('" + bgImages[i] + "')";
@@ -151,31 +277,25 @@
                 slideElements[i].classList.remove('active');
             }
         }
-
         currentSlideIndex = 0;
         slideElements[0].classList.add('active');
 
-        // 2枚以上あれば10秒ごとに自動フェード切り替え
         if (bgImages.length > 1) {
             clearInterval(slideshowInterval);
             slideshowInterval = setInterval(function() {
                 var previousIndex = currentSlideIndex;
                 currentSlideIndex = (currentSlideIndex + 1) % bgImages.length;
-                
                 slideElements[previousIndex].classList.remove('active');
                 slideElements[currentSlideIndex].classList.add('active');
             }, 10000); 
         }
     }
 
-    // 複数画像のストレージ保存
     function loadImages(event) {
         var files = event.target.files;
         if (!files || files.length === 0) return;
-
         bgImages = [];
-        var fileCount = Math.min(files.length, 5); // 最大5枚まで
-
+        var fileCount = Math.min(files.length, 5);
         var loadedCount = 0;
         for (var i = 0; i < fileCount; i++) {
             (function(index) {
@@ -183,13 +303,12 @@
                 reader.onload = function(e) {
                     bgImages.push(e.target.result);
                     loadedCount++;
-                    
                     if (loadedCount === fileCount) {
                         try {
                             localStorage.setItem('bgImagesSlideshow', JSON.stringify(bgImages));
                             startSlideshow();
                         } catch (error) {
-                            alert("画像の合計サイズが大きすぎるみたい。それらの画像1枚ずつスクショして、アップロードすると容量減るから試してみて！");
+                            alert("画質が大きすぎるらしい。。スクショすると容量が小さくなるから試してみて！。");
                             bgImages = [];
                             localStorage.removeItem('bgImagesSlideshow');
                             startSlideshow();
@@ -201,66 +320,95 @@
         }
     }
 
-    function updateCountdown() {
-        var countElement = document.getElementById('days-count');
-        var unitElement = document.getElementById('days-unit');
+    function updateCountdownFluid() {
+        var displayElement = document.getElementById('countdown-fluid');
         var dateDisplay = document.getElementById('target-date-display');
-        var btn = document.getElementById('setup-btn');
         
         if (!targetDateStr) {
-            countElement.innerText = '?';
-            unitElement.style.display = 'none';
-            dateDisplay.innerText = '下の手続きから設定してね！';
-            btn.innerText = '日付を設定する';
+            displayElement.innerText = '?-日 --:--:--';
+            dateDisplay.innerText = '設定を開いて名前と日付を入力してね！';
             return;
         }
 
         var now = new Date();
         var target = new Date(targetDateStr.replace(/-/g, '/') + ' 00:00:00');
         var diffTime = target.getTime() - now.getTime();
-        var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        unitElement.style.display = 'inline';
-        btn.innerText = '日付を変更する';
 
-        if (diffDays > 0) {
-            countElement.innerText = diffDays;
-            dateDisplay.innerText = '次会える日：' + targetDateStr.replace(/-/g, '/');
-        } else if (diffDays === 0) {
-            countElement.innerText = '0';
-            dateDisplay.innerText = 'ついに今日会えるね☺️';
+        if (diffTime > 0) {
+            var diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            var diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+            var diffSeconds = Math.floor((diffTime % (1000 * 60)) / (1000));
+
+            var hrs = ('0' + diffHours).slice(-2);
+            var mins = ('0' + diffMinutes).slice(-2);
+            var secs = ('0' + diffSeconds).slice(-2);
+
+            displayElement.innerHTML = diffDays + '<span class="unit">日</span> ' + hrs + ':' + mins + ':' + secs;
+            dateDisplay.innerText = '次のデート：' + targetDateStr.replace(/-/g, '/');
         } else {
-            countElement.innerText = '-';
-            unitElement.style.display = 'none';
-            dateDisplay.innerText = '新しい予定を設定してね！';
+            var diffDaysZeroCheck = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDaysZeroCheck === 0) {
+                displayElement.innerText = 'Today! ❤️';
+                dateDisplay.innerText = 'ついに今日会えるね☺️';
+            } else {
+                displayElement.innerText = '-';
+                dateDisplay.innerText = '新しい予定を設定してくね！';
+            }
         }
     }
 
-    function toggleDatePicker() {
-        var input = document.getElementById('date-input');
+    // ⚙️ 設定パネルの一括開閉と保存
+    function toggleSettings() {
+        var div = document.getElementById('settings-inputs');
         var btn = document.getElementById('setup-btn');
-        if (input.style.display === 'none') {
-            input.style.display = 'inline-block';
+        var dateInput = document.getElementById('date-input');
+        var boyIn = document.getElementById('boyfriend-name-input');
+        var girlIn = document.getElementById('girlfriend-name-input');
+
+        if (div.style.display === 'none') {
+            div.style.display = 'block';
             btn.innerText = '決定';
-            if (targetDateStr) input.value = targetDateStr;
+            if (targetDateStr) dateInput.value = targetDateStr;
+            boyIn.value = boyfriendName === '彼氏' ? '' : boyfriendName;
+            girlIn.value = girlfriendName === '彼女' ? '' : girlfriendName;
         } else {
-            if (input.value) {
-                targetDateStr = input.value;
+            if (dateInput.value) {
+                targetDateStr = dateInput.value;
                 localStorage.setItem('meetTargetDate', targetDateStr);
-                updateCountdown();
             }
-            input.style.display = 'none';
-            if (targetDateStr) {
-                btn.innerText = '日付を変更する';
-            } else {
-                btn.innerText = '日付を設定する';
+            if (boyIn.value.trim()) {
+                boyfriendName = boyIn.value.trim();
+                localStorage.setItem('boyfriendName', boyfriendName);
             }
+            if (girlIn.value.trim()) {
+                girlfriendName = girlIn.value.trim();
+                localStorage.setItem('girlfriendName', girlfriendName);
+            }
+
+            // 更新処理
+            updateCountdownFluid();
+            setRandomMessage();
+
+            div.style.display = 'none';
+            btn.innerText = '設定を変更する';
         }
     }
 
     window.onload = function() {
-        updateCountdown();
+        setRandomMessage();
         startSlideshow();
+        updateClocks();
+        updateCountdownFluid();
+        
+        if (targetDateStr || localStorage.getItem('boyfriendName')) {
+            document.getElementById('setup-btn').innerText = '設定を変更する';
+        }
+
+        setInterval(function() {
+            updateClocks();
+            updateCountdownFluid();
+        }, 1000);
     };
 </script>
 </body>
