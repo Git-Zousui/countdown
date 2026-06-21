@@ -15,8 +15,16 @@
         .days-box { font-size: 5.5rem; font-weight: 800; color: var(--accent-color); line-height: 1; margin: 15px 0; }
         .unit { font-size: 1.5rem; font-weight: 600; color: var(--text-color); }
         .target-date { font-size: 0.9rem; color: #8e8e93; margin-bottom: 20px; }
-        button { background: #cbd5e1; border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin: 5px; font-size: 0.85rem; transition: background 0.2s; }
-        button:active { background: #94a3b8; }
+        /* ボタン・入力フォームのスタイル */
+button {
+    background: #ff922b; /* 通常時のオレンジ色 */
+    border: none; padding: 10px 20px;
+    border-radius: 20px; color: white; font-weight: bold; cursor: pointer;
+    margin: 5px; font-size: 0.85rem; transition: background 0.2s;
+}
+button:active { 
+    background: #f76707; /* ボタンを押した瞬間の少し濃いオレンジ色 */
+}
         #notification-btn { background: var(--accent-color); }
         #notification-btn:active { background: #e0637b; }
         .date-picker-wrapper { margin-top: 15px; }
@@ -25,7 +33,7 @@
 </head>
 <body>
 <div class="container">
-    <div>彼女に会えるまで</div>
+    <div>会えるまで</div>
     <div class="days-box"><span id="days-count">--</span><span class="unit" id="days-unit" style="display:none;">日</span></div>
     <div class="target-date" id="target-date-display">予定が設定されていません</div>
     <div class="date-picker-wrapper"><input type="date" id="date-input" style="display:none;"></div>
@@ -38,11 +46,11 @@
         const countElement = document.getElementById('days-count');
         const unitElement = document.getElementById('days-unit');
         const dateDisplay = document.getElementById('target-date-display');
-        if (!targetDateStr) { countElement.innerText = '?'; unitElement.style.display = 'none'; dateDisplay.innerText = '下の手続きから、会える日を設定してください'; return; }
+        if (!targetDateStr) { countElement.innerText = '?'; unitElement.style.display = 'none'; dateDisplay.innerText = '下の手続きから会える日を設定し、通知も許可してみてね'; return; }
         const now = new Date(); const target = new Date(targetDateStr + 'T00:00:00'); const diffTime = target - now; const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         unitElement.style.display = 'inline';
-        if (diffDays > 0) { countElement.innerText = diffDays; dateDisplay.innerText = `次のデート：${targetDateStr.replace(/-/g, '/')}`; }
-        else if (diffDays === 0) { countElement.innerText = '0'; dateDisplay.innerText = 'ついに今日会える日です！❤️'; }
+        if (diffDays > 0) { countElement.innerText = diffDays; dateDisplay.innerText = `次に会えるまで：${targetDateStr.replace(/-/g, '/')}`; }
+        else if (diffDays === 0) { countElement.innerText = '0'; dateDisplay.innerText = 'ついに今日会える日だね🤍'; }
         else { countElement.innerText = '-'; unitElement.style.display = 'none'; dateDisplay.innerText = '新しい予定を設定してください'; }
     }
     function toggleDatePicker() {
