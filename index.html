@@ -16,6 +16,7 @@
         .unit { font-size: 1.5rem; font-weight: 600; color: var(--text-color); }
         .target-date { font-size: 0.9rem; color: #8e8e93; margin-bottom: 20px; }
         
+        /* オレンジ色ボタンのスタイル */
         button { 
             background: #ff922b; border: none; padding: 10px 20px; border-radius: 20px; 
             color: white; font-weight: bold; cursor: pointer; margin: 5px; 
@@ -31,7 +32,7 @@
 </head>
 <body>
 <div class="container">
-    <div>彼女に会えるまで</div>
+    <div>会えるまで</div>
     <div class="days-box"><span id="days-count">--</span><span class="unit" id="days-unit" style="display:none;">日</span></div>
     <div class="target-date" id="target-date-display">予定が設定されていません</div>
     <div class="date-picker-wrapper"><input type="date" id="date-input" style="display:none;"></div>
@@ -41,7 +42,7 @@
 <script>
     let targetDateStr = localStorage.getItem('meetTargetDate'); 
 
-    // 残り日数を計算する共通ロジック
+    // 残り日数を計算する関数
     function getRemainingDays() {
         if (!targetDateStr) return null;
         const now = new Date();
@@ -60,7 +61,7 @@
         if (diffDays === null) {
             countElement.innerText = '?';
             unitElement.style.display = 'none';
-            dateDisplay.innerText = '下の手続きから、会える日を設定してください';
+            dateDisplay.innerText = '下の手続きから、会える日を設定して、通知も許可してみてね！';
             return;
         }
 
@@ -78,18 +79,18 @@
         }
     }
 
-    // 🌟 アプリ起動時に画面上に通知を発生させる関数
+    // アプリ起動時にローカル通知を発生させる関数
     function triggerLocalNotification() {
         if (Notification.permission === 'granted' && targetDateStr) {
             const diffDays = getRemainingDays();
             let message = '';
             
             if (diffDays > 0) {
-                message = `彼女に会える日まで、あと 【 ${diffDays}日 】 です！楽しみですね。`;
+                message = `会える日まで、あと 【 ${diffDays}日 】 です！楽しみだね！`;
             } else if (diffDays === 0) {
-                message = 'ついに今日、彼女に会える日です！最高の1日にしてください❤️';
+                message = 'ついに今日会える日です！最高だね❤️';
             } else {
-                return; // 過去の日付の場合は通知しない
+                return; 
             }
 
             navigator.serviceWorker.ready.then(reg => {
@@ -114,7 +115,6 @@
                 targetDateStr = input.value;
                 localStorage.setItem('meetTargetDate', targetDateStr);
                 updateCountdown();
-                // 日付を新しく設定した直後にも通知を飛ばす
                 setTimeout(triggerLocalNotification, 500);
             }
             input.style.display = 'none';
@@ -124,13 +124,3 @@
 
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').then(() => {
-            console.log('SW Registered');
-            // 🌟 サービスワーカーの準備ができたら少し遅らせて起動時通知を実行
-            setTimeout(triggerLocalNotification, 1000);
-        }).catch(err => console.error(err));
-    }
-
-    function requestNotificationPermission() {
-        Notification.requestPermission().then(permission => {
-            if (permission === 'granted') {
-                document
