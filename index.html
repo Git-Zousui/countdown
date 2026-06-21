@@ -141,8 +141,7 @@
     <div class="settings-wrapper">
         <div id="settings-inputs" style="display:none; width: 100%;">
             <div class="input-group" style="margin-bottom: 6px;">
-                <input type="text" id="boyfriend-name-input" placeholder="彼氏の名前">
-                <input type="text" id="girlfriend-name-input" placeholder="彼女の名前">
+                <input type="text" id="girlfriend-name-input" placeholder="あなたの名前">
             </div>
             <div class="input-group">
                 <input type="date" id="date-input">
@@ -161,9 +160,8 @@
 
 <script>
     var targetDateStr = localStorage.getItem('meetTargetDate'); 
-    // 🌟 彼氏と彼女の名前の保存（初期値：彼氏 / 彼女）
-    var boyfriendName = localStorage.getItem('boyfriendName') || '彼氏';
-    var girlfriendName = localStorage.getItem('girlfriendName') || '彼女';
+    // 🌟 彼氏と彼女の名前の保存（初期値：あなた）
+    var girlfriendName = localStorage.getItem('girlfriendName') || 'あなた';
     var audioStarted = false;
     
     // スライドショー設定
@@ -180,7 +178,7 @@
     ];
     var slideshowInterval;
 
-    // 🌟 メッセージリスト（「{boy}」に彼氏の名前、「{girl}」に彼女の名前が自動挿入されます）
+    // 🌟 メッセージリスト（「{girl}」に彼女の名前が自動挿入されます）
     var mondayMessages = [
         "新しい一週間が始まったね。無理せずマイペースにいこう！☕️",
         "{girl}、大好きだよ☺️",
@@ -242,11 +240,11 @@
         var rawMessage = messageList[randomIndex];
         
         // 🌟 メッセージ内のタグを入力された名前に一括置換
-        var formattedMessage = rawMessage.replace(/{boy}/g, boyfriendName).replace(/{girl}/g, girlfriendName);
+        var formattedMessage = rawMessage.replace(/{girl}/g, girlfriendName);
         document.getElementById('random-message').innerText = formattedMessage;
         
         // アプリのメインタイトルも彼女の名前に自動連動
-        document.getElementById('app-title').innerText = girlfriendName + "に会えるまで";
+        document.getElementById('app-title').innerText = "会えるまで";
     }
 
     function updateClocks() {
@@ -325,8 +323,8 @@
         var dateDisplay = document.getElementById('target-date-display');
         
         if (!targetDateStr) {
-            displayElement.innerText = '?-日 --:--:--';
-            dateDisplay.innerText = '設定を開いて名前と日付を入力してね！';
+            displayElement.innerText = '?日 --:--:--';
+            dateDisplay.innerText = '設定を開いて名前と会う日付を入力してね！';
             return;
         }
 
@@ -345,7 +343,7 @@
             var secs = ('0' + diffSeconds).slice(-2);
 
             displayElement.innerHTML = diffDays + '<span class="unit">日</span> ' + hrs + ':' + mins + ':' + secs;
-            dateDisplay.innerText = '次のデート：' + targetDateStr.replace(/-/g, '/');
+            dateDisplay.innerText = '次に会える日：' + targetDateStr.replace(/-/g, '/');
         } else {
             var diffDaysZeroCheck = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             if (diffDaysZeroCheck === 0) {
@@ -370,16 +368,11 @@
             div.style.display = 'block';
             btn.innerText = '決定';
             if (targetDateStr) dateInput.value = targetDateStr;
-            boyIn.value = boyfriendName === '彼氏' ? '' : boyfriendName;
             girlIn.value = girlfriendName === '彼女' ? '' : girlfriendName;
         } else {
             if (dateInput.value) {
                 targetDateStr = dateInput.value;
                 localStorage.setItem('meetTargetDate', targetDateStr);
-            }
-            if (boyIn.value.trim()) {
-                boyfriendName = boyIn.value.trim();
-                localStorage.setItem('boyfriendName', boyfriendName);
             }
             if (girlIn.value.trim()) {
                 girlfriendName = girlIn.value.trim();
