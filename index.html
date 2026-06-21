@@ -9,35 +9,43 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
     <style>
-        :root { --bg-color: #fef6f6; --card-bg: rgba(255, 255, 255, 0.85); --text-color: #4a4a4a; --accent-color: #ff7b93; }
+        /* 🌟 background-colorを少し濃くして、カードを薄くしたときに見やすく調整 */
+        :root { --bg-color: #fef6f6; --text-color: #4a4a4a; --accent-color: #ff7b93; }
+        
         body { 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
             background-color: var(--bg-color); 
             color: var(--text-color); 
             display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; 
-            /* 🌟 背景画像の設定 */
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
         }
+
+        /* 🌟 白いカード部分を薄く（rgbaで透明度を設定） */
         .container { 
             text-align: center; 
-            background: var(--card-bg); 
-            padding: 40px 30px; border-radius: 24px; 
+            background: rgba(255, 255, 255, 0.65); /* 🌟 ここで透明度を調整 (0.0〜1.0) */
+            padding: 40px 30px; 
+            border-radius: 24px; 
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
             width: 80%; max-width: 350px; 
-            backdrop-filter: blur(8px); /* 🌟 背景をほんのりぼかして文字を見やすく */
-            -webkit-backdrop-filter: blur(8px);
+
+            /* 🌟 ガラスのような質感にするためのぼかし効果 (Safari用) */
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px);
         }
+
         .days-box { font-size: 5.5rem; font-weight: 800; color: var(--accent-color); line-height: 1; margin: 15px 0; }
         .unit { font-size: 1.5rem; font-weight: 600; color: var(--text-color); }
         .target-date { font-size: 0.9rem; color: #666; margin-bottom: 20px; font-weight: 500; }
+        
         button { background: #ff922b; border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin: 5px; font-size: 0.85rem; transition: background 0.2s; }
         button:active { background: #f76707; }
         .date-picker-wrapper { margin-top: 15px; }
         input[type="date"] { padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 1rem; color: var(--text-color); outline: none; }
         
-        /* 🌟 画像選択ボタンを隠すためのスタイル */
+        /* 画像選択ボタン関連 */
         #image-input { display: none; }
         .sub-btn { background: #8e8e93; font-size: 0.75rem; padding: 6px 12px; }
         .sub-btn:active { background: #636366; }
@@ -45,7 +53,7 @@
 </head>
 <body>
 <div class="container">
-    <div>会えるまで</div>
+    <div>会えるまで💭</div>
     <div class="days-box"><span id="days-count">?</span><span class="unit" id="days-unit" style="display:none;">日</span></div>
     <div class="target-date" id="target-date-display">予定が設定されていません</div>
     <div class="date-picker-wrapper"><input type="date" id="date-input" style="display:none;"></div>
@@ -61,7 +69,7 @@
 <script>
     var targetDateStr = localStorage.getItem('meetTargetDate'); 
 
-    // 🌟 起動時に保存された画像を読み込む処理
+    // 起動時に保存された画像を読み込む処理
     var savedImage = localStorage.getItem('bgImage');
     if (savedImage) {
         document.body.style.backgroundImage = "url('" + savedImage + "')";
@@ -77,7 +85,7 @@
                     localStorage.setItem('bgImage', base64Image);
                     document.body.style.backgroundImage = "url('" + base64Image + "')";
                 } catch (error) {
-                    alert("画像サイズが大きすぎます。別の画像を選ぶか、スクリーンショットなどで容量を小さくした画像をお試しください。");
+                    alert("画像サイズが大きいみたいだから、その画像をスクリーンショットした画像を準備して、容量を小さくしてね！");
                 }
             };
             reader.readAsDataURL(file);
@@ -93,7 +101,7 @@
         if (!targetDateStr) {
             countElement.innerText = '?';
             unitElement.style.display = 'none';
-            dateDisplay.innerText = '下の手続きから、会える日を設定してね';
+            dateDisplay.innerText = '下の手続きから、会える日を設定してね！';
             btn.innerText = '日付を設定する';
             return;
         }
@@ -108,7 +116,7 @@
 
         if (diffDays > 0) {
             countElement.innerText = diffDays;
-            dateDisplay.innerText = '次に会えるまで：' + targetDateStr.replace(/-/g, '/');
+            dateDisplay.innerText = '次会えるまで：' + targetDateStr.replace(/-/g, '/');
         } else if (diffDays === 0) {
             countElement.innerText = '0';
             dateDisplay.innerText = 'ついに今日会えるね☺️';
