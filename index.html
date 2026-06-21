@@ -16,18 +16,12 @@
         .unit { font-size: 1.5rem; font-weight: 600; color: var(--text-color); }
         .target-date { font-size: 0.9rem; color: #8e8e93; margin-bottom: 20px; }
         
-        /* 🧡 ボタン・入力フォームのスタイル（オレンジ色に変更済み） */
         button { 
-            background: #ff922b; /* 通常時のオレンジ */
-            border: none; padding: 10px 20px; border-radius: 20px; 
+            background: #ff922b; border: none; padding: 10px 20px; border-radius: 20px; 
             color: white; font-weight: bold; cursor: pointer; margin: 5px; 
             font-size: 0.85rem; transition: background 0.2s; 
         }
-        button:active { 
-            background: #f76707; /* タップした瞬間の濃いオレンジ */
-        }
-        
-        /* 通知ボタン（ピンク）はそのまま残しています */
+        button:active { background: #f76707; }
         #notification-btn { background: var(--accent-color); }
         #notification-btn:active { background: #e0637b; }
         
@@ -46,34 +40,97 @@
 </div>
 <script>
     let targetDateStr = localStorage.getItem('meetTargetDate'); 
+
+    // 残り日数を計算する共通ロジック
+    function getRemainingDays() {
+        if (!targetDateStr) return null;
+        const now = new Date();
+        const target = new Date(targetDateStr + 'T00:00:00');
+        const diffTime = target - now;
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+
     function updateCountdown() {
         const countElement = document.getElementById('days-count');
         const unitElement = document.getElementById('days-unit');
         const dateDisplay = document.getElementById('target-date-display');
-        if (!targetDateStr) { countElement.innerText = '?'; unitElement.style.display = 'none'; dateDisplay.innerText = '下の手続きから、会える日を設定してください'; return; }
-        const now = new Date(); const target = new Date(targetDateStr + 'T00:00:00'); const diffTime = target - now; const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        const diffDays = getRemainingDays();
+        
+        if (diffDays === null) {
+            countElement.innerText = '?';
+            unitElement.style.display = 'none';
+            dateDisplay.innerText = '下の手続きから、会える日を設定してください';
+            return;
+        }
+
         unitElement.style.display = 'inline';
-        if (diffDays > 0) { countElement.innerText = diffDays; dateDisplay.innerText = `次のデート：${targetDateStr.replace(/-/g, '/')}`; }
-        else if (diffDays === 0) { countElement.innerText = '0'; dateDisplay.innerText = 'ついに今日会える日です！❤️'; }
-        else { countElement.innerText = '-'; unitElement.style.display = 'none'; dateDisplay.innerText = '新しい予定を設定してください'; }
+        if (diffDays > 0) {
+            countElement.innerText = diffDays;
+            dateDisplay.innerText = `次のデート：${targetDateStr.replace(/-/g, '/')}`;
+        } else if (diffDays === 0) {
+            countElement.innerText = '0';
+            dateDisplay.innerText = 'ついに今日会える日です！❤️';
+        } else {
+            countElement.innerText = '-';
+            unitElement.style.display = 'none';
+            dateDisplay.innerText = '新しい予定を設定してください';
+        }
     }
+
+    // 🌟 アプリ起動時に画面上に通知を発生させる関数
+    function triggerLocalNotification() {
+        if (Notification.permission === 'granted' && targetDateStr) {
+            const diffDays = getRemainingDays();
+            let message = '';
+            
+            if (diffDays > 0) {
+                message = `彼女に会える日まで、あと 【 ${diffDays}日 】 です！楽しみですね。`;
+            } else if (diffDays === 0) {
+                message = 'ついに今日、彼女に会える日です！最高の1日にしてください❤️';
+            } else {
+                return; // 過去の日付の場合は通知しない
+            }
+
+            navigator.serviceWorker.ready.then(reg => {
+                reg.showNotification('カウントダウン', {
+                    body: message,
+                    icon: 'icon.png',
+                    badge: 'icon.png'
+                });
+            });
+        }
+    }
+
     function toggleDatePicker() {
-        const input = document.getElementById('date-input'); const btn = document.getElementById('setup-btn');
-        if (input.style.display === 'none') { input.style.display = 'inline-block'; btn.innerText = '決定'; if(targetDateStr) input.value = targetDateStr; }
-        else { if (input.value) { targetDateStr = input.value; localStorage.setItem('meetTargetDate', targetDateStr); updateCountdown(); } input.style.display = 'none'; btn.innerText = '日付を変更する'; }
+        const input = document.getElementById('date-input');
+        const btn = document.getElementById('setup-btn');
+        if (input.style.display === 'none') {
+            input.style.display = 'inline-block';
+            btn.innerText = '決定';
+            if(targetDateStr) input.value = targetDateStr;
+        } else {
+            if (input.value) {
+                targetDateStr = input.value;
+                localStorage.setItem('meetTargetDate', targetDateStr);
+                updateCountdown();
+                // 日付を新しく設定した直後にも通知を飛ばす
+                setTimeout(triggerLocalNotification, 500);
+            }
+            input.style.display = 'none';
+            btn.innerText = '日付を変更する';
+        }
     }
-    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').then(() => console.log('SW Registered')).catch(err => console.error(err)); }
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').then(() => {
+            console.log('SW Registered');
+            // 🌟 サービスワーカーの準備ができたら少し遅らせて起動時通知を実行
+            setTimeout(triggerLocalNotification, 1000);
+        }).catch(err => console.error(err));
+    }
+
     function requestNotificationPermission() {
         Notification.requestPermission().then(permission => {
             if (permission === 'granted') {
-                alert('通知が許可されました！'); document.getElementById('notification-btn').style.display = 'none';
-                setTimeout(() => { navigator.serviceWorker.ready.then(reg => { reg.showNotification('カウントダウンアプリ', { body: '通知テスト成功！二人が会える日まであと少しです。', icon: 'icon.png' }); }); }, 3000);
-            }
-        });
-    }
-    updateCountdown();
-    if (targetDateStr) { document.getElementById('setup-btn').innerText = '日付を変更する'; }
-    if (Notification.permission === 'granted') { document.getElementById('notification-btn').style.display = 'none'; }
-</script>
-</body>
-</html>
+                document
