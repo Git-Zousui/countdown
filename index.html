@@ -17,7 +17,7 @@
             color: var(--text-color); 
             display: flex; 
             flex-direction: column;
-            justify-content: flex-end; /* 🌟 中身をすべて画面下部に寄せる */
+            justify-content: flex-end; 
             align-items: center; 
             height: 100vh; 
             margin: 0; 
@@ -27,21 +27,19 @@
             box-sizing: border-box;
         }
 
-        /* 🌟 下部にぴったり配置するためのコンテナ調整 */
         .container { 
             text-align: center; 
             background: rgba(255, 255, 255, 0.65); 
             padding: 30px 25px; 
             border-radius: 24px; 
-            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.08); /* 🌟 影を下から上へ */
+            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.08); 
             width: 85%; 
             max-width: 350px; 
-            margin-bottom: 40px; /* 🌟 iPhoneのホームバーと被らないよう下マージンを確保 */
+            margin-bottom: 40px; 
             backdrop-filter: blur(10px); 
             -webkit-backdrop-filter: blur(10px);
         }
 
-        /* 🌟 写真を邪魔しないよう数字を少しコンパクトに調整 */
         .days-box { font-size: 5rem; font-weight: 800; color: var(--accent-color); line-height: 1; margin: 10px 0; }
         .unit { font-size: 1.4rem; font-weight: 600; color: var(--text-color); }
         .target-date { font-size: 0.85rem; color: #555; margin-bottom: 15px; font-weight: 500; }
@@ -51,13 +49,12 @@
         .date-picker-wrapper { margin-top: 10px; }
         input[type="date"] { padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 1rem; color: var(--text-color); outline: none; }
         
-        /* 画像選択ボタン */
         #image-input { display: none; }
         .sub-btn { background: #8e8e93; font-size: 0.75rem; padding: 6px 12px; }
         .sub-btn:active { background: #636366; }
     </style>
 </head>
-<body>
+<body onclick="initAudio()">
 
 <div class="container">
     <div>会えるまで</div>
@@ -73,10 +70,24 @@
     </div>
 </div>
 
+<audio id="bgm" src="bgm.mp3" loop></audio>
+
 <script>
     var targetDateStr = localStorage.getItem('meetTargetDate'); 
+    var audioStarted = false;
 
-    // 起動時に保存された画像を読み込む処理
+    // 🌟 画面タップ時に音楽を再生する関数
+    function initAudio() {
+        if (audioStarted) return;
+        var bgm = document.getElementById('bgm');
+        bgm.play().then(function() {
+            audioStarted = true;
+        }).catch(function(err) {
+            console.log("Audio play blocked:", err);
+        });
+    }
+
+    // 起動時に保存された画像を読み込む
     var savedImage = localStorage.getItem('bgImage');
     if (savedImage) {
         document.body.style.backgroundImage = "url('" + savedImage + "')";
@@ -92,7 +103,7 @@
                     localStorage.setItem('bgImage', base64Image);
                     document.body.style.backgroundImage = "url('" + base64Image + "')";
                 } catch (error) {
-                    alert("画像サイズが大きくてアップロードできないみたい。その画像をスクショして、それをアップロードしてみて！スクショって容量小さくできるんだよ！");
+                    alert("画像サイズが大きすぎるみたい。その画像をスクショしたものを使うと容量が小さくなるからやってみて！");
                 }
             };
             reader.readAsDataURL(file);
@@ -108,7 +119,7 @@
         if (!targetDateStr) {
             countElement.innerText = '?';
             unitElement.style.display = 'none';
-            dateDisplay.innerText = '下の手続きから、会える日を設定してね';
+            dateDisplay.innerText = '下の手続きから、会える日を設定してね！';
             btn.innerText = '日付を設定する';
             return;
         }
@@ -123,10 +134,10 @@
 
         if (diffDays > 0) {
             countElement.innerText = diffDays;
-            dateDisplay.innerText = '次会える日：' + targetDateStr.replace(/-/g, '/');
+            dateDisplay.innerText = '次に会えるまで：' + targetDateStr.replace(/-/g, '/');
         } else if (diffDays === 0) {
             countElement.innerText = '0';
-            dateDisplay.innerText = 'ついに今日会えるね☺️';
+            dateDisplay.innerText = 'ついに今日会える会えるね☺️';
         } else {
             countElement.innerText = '-';
             unitElement.style.display = 'none';
