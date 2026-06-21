@@ -50,7 +50,7 @@
         /* 🤍 画面下部のコンテナ */
         .container { 
             text-align: center; 
-            background: rgba(255, 255, 255, 0.7); 
+            background: rgba(255, 255, 255, 0.75); 
             padding: 18px 16px; 
             border-radius: 24px; 
             box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.08); 
@@ -94,11 +94,12 @@
         
         .target-date { font-size: 0.7rem; color: #777; margin-bottom: 10px; font-weight: 500; }
         
-        /* ⚙️ 入力欄・ボタンのスタイル */
+        /* ⚙️ 設定エリアのスタイル */
         .settings-wrapper { margin-top: 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
         .input-group { display: flex; gap: 4px; justify-content: center; width: 100%; }
-        input[type="date"], input[type="text"] { padding: 5px 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.85rem; color: var(--text-color); outline: none; text-align: center; box-sizing: border-box; }
+        input[type="date"], input[type="text"] { padding: 6px 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.85rem; color: var(--text-color); outline: none; text-align: center; box-sizing: border-box; }
         input[type="text"] { width: 48%; }
+        input[type="date"] { width: 98%; }
         
         button { background: #ff922b; border: none; padding: 6px 14px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin: 2px; font-size: 0.75rem; transition: background 0.2s; }
         button:active { background: #f76707; }
@@ -130,18 +131,19 @@
         </div>
     </div>
 
-    <div class="message-area" id="random-message"></div>
+    <div class="message-area" id="random-message">✨</div>
 
-    <div class="title-text" id="app-title">会えるまで</div>
+    <div class="title-text" id="app-title">彼女に会えるまで</div>
     
-    <div class="days-box" id="countdown-fluid">?日 --:--:--</div>
+    <div class="days-box" id="countdown-fluid">?-日 --:--:--</div>
     
-    <div class="target-date" id="target-date-display">設定から名前と日付を入力してね！</div>
+    <div class="target-date" id="target-date-display">設定から名前と日付を入力してください</div>
     
     <div class="settings-wrapper">
         <div id="settings-inputs" style="display:none; width: 100%;">
             <div class="input-group" style="margin-bottom: 6px;">
-                <input type="text" id="girlfriend-name-input" placeholder="あなたの名前">
+                <input type="text" id="boyfriend-name-input" placeholder="彼氏の名前">
+                <input type="text" id="girlfriend-name-input" placeholder="彼女の名前">
             </div>
             <div class="input-group">
                 <input type="date" id="date-input">
@@ -159,17 +161,22 @@
 <audio id="bgm" src="bgm.mp3" loop></audio>
 
 <script>
-    var targetDateStr = localStorage.getItem('meetTargetDate'); 
-    // 🌟 彼氏と彼女の名前の保存（初期値：あなた）
-    var girlfriendName = localStorage.getItem('girlfriendName') || 'あなた';
+    var targetDateStr = localStorage.getItem('meetTargetDate') || ''; 
+    var boyfriendName = localStorage.getItem('boyfriendName') || '彼氏';
+    var girlfriendName = localStorage.getItem('girlfriendName') || '彼女';
     var audioStarted = false;
     
     // スライドショー設定
-    var savedImagesJSON = localStorage.getItem('bgImagesSlideshow');
     var bgImages = [];
-    if (savedImagesJSON) {
-        bgImages = JSON.parse(savedImagesJSON);
+    try {
+        var savedImagesJSON = localStorage.getItem('bgImagesSlideshow');
+        if (savedImagesJSON) {
+            bgImages = JSON.parse(savedImagesJSON);
+        }
+    } catch(e) {
+        console.error("ストレージ読み込み失敗:", e);
     }
+    
     var currentSlideIndex = 0;
     var slideElements = [
         document.getElementById('slide-0'), document.getElementById('slide-1'),
@@ -178,50 +185,34 @@
     ];
     var slideshowInterval;
 
-    // 🌟 メッセージリスト（「{girl}」に彼女の名前が自動挿入されます）
+    // 🌟 彼女視点メッセージ（彼氏の名前 {boy} を一切排除した、安全で一途な文章）
     var mondayMessages = [
         "新しい一週間が始まったね。無理せずマイペースにいこう！☕️",
-        "{girl}、大好きだよ☺️",
-        "不安なことは一緒に乗り越えよう！",
-        "{girl}、可愛い！",
-        "辛いことがあったら、遠慮せず話してね。一緒に悩もう！",
-        "月曜日お疲れ様！{girl}に会える日にまた一歩近づいた！"
+        "月曜日お疲れ様！会える日にまた一歩近づいたよ。"
     ];
     var tuesdayMessages = [
-        "{girl}、火曜日もお疲れ様！ロンドンの{girl}は今何時かな？📮",
-        "{girl}、大好きだよ☺️",
-        "色々一緒に乗り越えよう！",
-        "今日も一日よく頑張りました！{girl}へハグを送るね🫂",
-        "{girl}は十分頑張ってる！たまにはサボっちゃえ笑"
+        "火曜日もお疲れ様！ロンドンの{girl}は今、夜の準備中だよ📮",
+        "今日も一日よく頑張りました！{girl}から大きなハグを送るね🫂"
     ];
     var wednesdayMessages = [
-        "水曜日、一週間の折り返しだね！あと半分一緒に頑張ろう！",
-        "{girl}、大好き☺️",
-        "{girl}、可愛い！",
-        "お仕事お疲れ様。ゆっくり休んでね💤"
+        "水曜日、一週間の折り返しだね！あと半分一緒に頑張ろう。",
+        "お仕事お疲れ様。{girl}を想いながら、ゆっくり休んでね。"
     ];
     var thursdayMessages = [
-        "木曜日お疲れ様！あと少しで週末だね、{boy}。ワクワク✨",
-        "{girl}、大好き過ぎる☺️",
-        "{girl}、可愛い！",
-        "辛いことがあったら、遠慮せず話してね。一緒に悩もう！"
-        "いつも一生懸命頑張る{girl}のこと、本当に尊敬してるよ。"
+        "木曜日お疲れ様！あと少しで週末だね。ワクワク✨",
+        "いつも一生懸命頑張る姿、{girl}は本当に尊敬してるよ。"
     ];
     var fridayMessages = [
-        "{girl}、金曜日お疲れ様！TGIF！本当に頑張ったね🎉",
-        "{girl}、大好き〜☺️",
-        "飲み過ぎには注意だよ〜。俺も気をつけます！！",
-        "卑しい男は近づけません！ｼｯｼｯ🧹",
-        "今週も仕事やりきった！お疲れ様！"
+        "金曜日お疲れ様！やっと週末だ〜！本当に頑張ったね🎉",
+        "今週も仕事やりきった！{girl}と次にやりたいことを妄想中…❤️"
     ];
     var weekendMessages = [
         "素敵な週末になりますように！お出かけ楽しんでね🌿",
-        "ゆっくり休めてる？{girl}と一緒に今週もリフレッシュしよう💤",
-        "離れていても、俺と{girl}の心はいつも一緒だよ！",
-        "お先に月曜日迎えとくね😔"
+        "ゆっくり休めてる？{girl}と一緒に今週もリフレッシュしよう。💤",
+        "離れていても、二人の心はいつもすぐ隣にいるよ。",
+        "次に会えたら行きたい場所、{girl}がたくさん見つけたんだ！"
     ];
 
-    // 曜日と名前を考慮してメッセージをセットする関数
     function setRandomMessage() {
         var now = new Date();
         var dayOfWeek = now.getDay(); 
@@ -239,12 +230,11 @@
         var randomIndex = Math.floor(Math.random() * messageList.length);
         var rawMessage = messageList[randomIndex];
         
-        // 🌟 メッセージ内のタグを入力された名前に一括置換
-        var formattedMessage = rawMessage.replace(/{girl}/g, girlfriendName);
-        document.getElementById('random-message').innerText = formattedMessage;
+        // 🌟 彼女の名前 {girl} のみを変換（{boy} を含まないため不具合も完全に起きません）
+        var formattedMessage = String(rawMessage).split("{girl}").join(girlfriendName);
         
-        // アプリのメインタイトルも彼女の名前に自動連動
-        document.getElementById('app-title').innerText = "会えるまで";
+        document.getElementById('random-message').innerText = formattedMessage;
+        document.getElementById('app-title').innerText = girlfriendName + "に会えるまで";
     }
 
     function updateClocks() {
@@ -258,15 +248,17 @@
     function initAudio() {
         if (audioStarted) return;
         var bgm = document.getElementById('bgm');
-        bgm.play().then(function() {
-            audioStarted = true;
-        }).catch(function(err) {
-            console.log("Audio play blocked:", err);
-        });
+        if (bgm) {
+            bgm.play().then(function() {
+                audioStarted = true;
+            }).catch(function(err) {
+                console.log("Audio play blocked by browser:", err);
+            });
+        }
     }
 
     function startSlideshow() {
-        if (bgImages.length === 0) return;
+        if (!bgImages || bgImages.length === 0) return;
         for (var i = 0; i < slideElements.length; i++) {
             if (i < bgImages.length) {
                 slideElements[i].style.backgroundImage = "url('" + bgImages[i] + "')";
@@ -306,7 +298,7 @@
                             localStorage.setItem('bgImagesSlideshow', JSON.stringify(bgImages));
                             startSlideshow();
                         } catch (error) {
-                            alert("画質が大きすぎるらしい。。スクショすると容量が小さくなるから試してみて！。");
+                            alert("画質が大きすぎます。スクショ等で縮小した画像をお試しください。");
                             bgImages = [];
                             localStorage.removeItem('bgImagesSlideshow');
                             startSlideshow();
@@ -323,8 +315,8 @@
         var dateDisplay = document.getElementById('target-date-display');
         
         if (!targetDateStr) {
-            displayElement.innerText = '?日 --:--:--';
-            dateDisplay.innerText = '設定を開いて名前と会う日付を入力してね！';
+            displayElement.innerText = '?-日 --:--:--';
+            dateDisplay.innerText = '設定を開いて名前と日付を入力してください';
             return;
         }
 
@@ -343,20 +335,19 @@
             var secs = ('0' + diffSeconds).slice(-2);
 
             displayElement.innerHTML = diffDays + '<span class="unit">日</span> ' + hrs + ':' + mins + ':' + secs;
-            dateDisplay.innerText = '次に会える日：' + targetDateStr.replace(/-/g, '/');
+            dateDisplay.innerText = '次のデート：' + targetDateStr.replace(/-/g, '/');
         } else {
             var diffDaysZeroCheck = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             if (diffDaysZeroCheck === 0) {
                 displayElement.innerText = 'Today! ❤️';
-                dateDisplay.innerText = 'ついに今日会えるね☺️';
+                dateDisplay.innerText = 'ついに今日会える日です！';
             } else {
                 displayElement.innerText = '-';
-                dateDisplay.innerText = '新しい予定を設定してくね！';
+                dateDisplay.innerText = '新しい予定を設定してください';
             }
         }
     }
 
-    // ⚙️ 設定パネルの一括開閉と保存
     function toggleSettings() {
         var div = document.getElementById('settings-inputs');
         var btn = document.getElementById('setup-btn');
@@ -364,22 +355,28 @@
         var boyIn = document.getElementById('boyfriend-name-input');
         var girlIn = document.getElementById('girlfriend-name-input');
 
+        if (!div || !btn) return;
+
         if (div.style.display === 'none') {
             div.style.display = 'block';
-            btn.innerText = '決定';
+            btn.innerText = '決定して保存';
             if (targetDateStr) dateInput.value = targetDateStr;
+            boyIn.value = boyfriendName === '彼氏' ? '' : boyfriendName;
             girlIn.value = girlfriendName === '彼女' ? '' : girlfriendName;
         } else {
             if (dateInput.value) {
                 targetDateStr = dateInput.value;
                 localStorage.setItem('meetTargetDate', targetDateStr);
             }
+            if (boyIn.value.trim()) {
+                boyfriendName = boyIn.value.trim();
+                localStorage.setItem('boyfriendName', boyfriendName);
+            }
             if (girlIn.value.trim()) {
                 girlfriendName = girlIn.value.trim();
                 localStorage.setItem('girlfriendName', girlfriendName);
             }
 
-            // 更新処理
             updateCountdownFluid();
             setRandomMessage();
 
@@ -395,7 +392,8 @@
         updateCountdownFluid();
         
         if (targetDateStr || localStorage.getItem('boyfriendName')) {
-            document.getElementById('setup-btn').innerText = '設定を変更する';
+            var btn = document.getElementById('setup-btn');
+            if (btn) btn.innerText = '設定を変更する';
         }
 
         setInterval(function() {
