@@ -43,7 +43,7 @@
         if (!targetDateStr) {
             countElement.innerText = '?';
             unitElement.style.display = 'none';
-            dateDisplay.innerText = '下の手続きから、会える日を設定してください';
+            dateDisplay.innerText = '下の手続きから、会える日を設定してね！';
             btn.innerText = '日付を設定する';
             return;
         }
@@ -62,11 +62,11 @@
             dateDisplay.innerText = '次のデート：' + targetDateStr.replace(/-/g, '/');
         } else if (diffDays === 0) {
             countElement.innerText = '0';
-            dateDisplay.innerText = 'ついに今日会える日です！❤️';
+            dateDisplay.innerText = 'ついに今日会えるね😘';
         } else {
             countElement.innerText = '-';
             unitElement.style.display = 'none';
-            dateDisplay.innerText = '新しい予定を設定してください';
+            dateDisplay.innerText = '新しい予定を設定してね';
         }
     }
 
