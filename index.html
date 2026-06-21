@@ -9,16 +9,38 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
     <style>
-        :root { --bg-color: #fef6f6; --card-bg: #ffffff; --text-color: #4a4a4a; --accent-color: #ff7b93; }
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { text-align: center; background: var(--card-bg); padding: 40px 30px; border-radius: 24px; box-shadow: 0 10px 30px rgba(255, 123, 147, 0.15); width: 80%; max-width: 350px; }
+        :root { --bg-color: #fef6f6; --card-bg: rgba(255, 255, 255, 0.85); --text-color: #4a4a4a; --accent-color: #ff7b93; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; 
+            /* 🌟 背景画像の設定 */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .container { 
+            text-align: center; 
+            background: var(--card-bg); 
+            padding: 40px 30px; border-radius: 24px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
+            width: 80%; max-width: 350px; 
+            backdrop-filter: blur(8px); /* 🌟 背景をほんのりぼかして文字を見やすく */
+            -webkit-backdrop-filter: blur(8px);
+        }
         .days-box { font-size: 5.5rem; font-weight: 800; color: var(--accent-color); line-height: 1; margin: 15px 0; }
         .unit { font-size: 1.5rem; font-weight: 600; color: var(--text-color); }
-        .target-date { font-size: 0.9rem; color: #8e8e93; margin-bottom: 20px; }
+        .target-date { font-size: 0.9rem; color: #666; margin-bottom: 20px; font-weight: 500; }
         button { background: #ff922b; border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin: 5px; font-size: 0.85rem; transition: background 0.2s; }
         button:active { background: #f76707; }
         .date-picker-wrapper { margin-top: 15px; }
         input[type="date"] { padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 1rem; color: var(--text-color); outline: none; }
+        
+        /* 🌟 画像選択ボタンを隠すためのスタイル */
+        #image-input { display: none; }
+        .sub-btn { background: #8e8e93; font-size: 0.75rem; padding: 6px 12px; }
+        .sub-btn:active { background: #636366; }
     </style>
 </head>
 <body>
@@ -27,12 +49,40 @@
     <div class="days-box"><span id="days-count">?</span><span class="unit" id="days-unit" style="display:none;">日</span></div>
     <div class="target-date" id="target-date-display">予定が設定されていません</div>
     <div class="date-picker-wrapper"><input type="date" id="date-input" style="display:none;"></div>
+    
     <button id="setup-btn" onclick="toggleDatePicker()">日付を設定する</button>
+    
+    <div style="margin-top: 15px;">
+        <label for="image-input" class="sub-btn" style="color:white; font-weight:bold; border-radius:20px; padding:6px 12px; cursor:pointer; background:#8e8e93; font-size:0.75rem;">背景画像を選ぶ</label>
+        <input type="file" id="image-input" accept="image/*" onchange="loadImage(event)">
+    </div>
 </div>
 
 <script>
-    // 確実にグローバルで値を管理
     var targetDateStr = localStorage.getItem('meetTargetDate'); 
+
+    // 🌟 起動時に保存された画像を読み込む処理
+    var savedImage = localStorage.getItem('bgImage');
+    if (savedImage) {
+        document.body.style.backgroundImage = "url('" + savedImage + "')";
+    }
+
+    function loadImage(event) {
+        var file = event.target.files[0];
+        if (file) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var base64Image = e.target.result;
+                try {
+                    localStorage.setItem('bgImage', base64Image);
+                    document.body.style.backgroundImage = "url('" + base64Image + "')";
+                } catch (error) {
+                    alert("画像サイズが大きすぎます。別の画像を選ぶか、スクリーンショットなどで容量を小さくした画像をお試しください。");
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
 
     function updateCountdown() {
         var countElement = document.getElementById('days-count');
@@ -43,13 +93,12 @@
         if (!targetDateStr) {
             countElement.innerText = '?';
             unitElement.style.display = 'none';
-            dateDisplay.innerText = '下の手続きから、会える日を設定してね！';
+            dateDisplay.innerText = '下の手続きから、会える日を設定してね';
             btn.innerText = '日付を設定する';
             return;
         }
 
         var now = new Date();
-        // Safariでも絶対にバグらない日付解釈の書き方に修正
         var target = new Date(targetDateStr.replace(/-/g, '/') + ' 00:00:00');
         var diffTime = target.getTime() - now.getTime();
         var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -59,21 +108,20 @@
 
         if (diffDays > 0) {
             countElement.innerText = diffDays;
-            dateDisplay.innerText = '次のデート：' + targetDateStr.replace(/-/g, '/');
+            dateDisplay.innerText = '次に会えるまで：' + targetDateStr.replace(/-/g, '/');
         } else if (diffDays === 0) {
             countElement.innerText = '0';
-            dateDisplay.innerText = 'ついに今日会えるね😘';
+            dateDisplay.innerText = 'ついに今日会えるね☺️';
         } else {
             countElement.innerText = '-';
             unitElement.style.display = 'none';
-            dateDisplay.innerText = '新しい予定を設定してね';
+            dateDisplay.innerText = '新しい予定を設定してください';
         }
     }
 
     function toggleDatePicker() {
         var input = document.getElementById('date-input');
         var btn = document.getElementById('setup-btn');
-        
         if (input.style.display === 'none') {
             input.style.display = 'inline-block';
             btn.innerText = '決定';
@@ -93,7 +141,6 @@
         }
     }
 
-    // トラブルの原因になる通知関連の登録をすべて排除し、シンプルに起動
     window.onload = function() {
         updateCountdown();
     };
