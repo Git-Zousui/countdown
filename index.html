@@ -51,12 +51,12 @@
         .container { 
             text-align: center; 
             background: rgba(255, 255, 255, 0.75); 
-            padding: 18px 16px; 
+            padding: 16px 14px; 
             border-radius: 24px; 
             box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.08); 
-            width: 86%; 
+            width: 88%; 
             max-width: 340px; 
-            margin-bottom: 30px; 
+            margin-bottom: 20px; 
             backdrop-filter: blur(15px); 
             -webkit-backdrop-filter: blur(15px);
             z-index: 10;
@@ -67,9 +67,9 @@
         .clocks-container {
             display: flex;
             justify-content: space-around;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             border-bottom: 1px solid rgba(0,0,0,0.06);
-            padding-bottom: 8px;
+            padding-bottom: 6px;
         }
         .clock-box { flex: 1; }
         .clock-label { font-size: 0.65rem; color: #777; font-weight: bold; margin-bottom: 2px; }
@@ -81,7 +81,7 @@
             font-weight: 600;
             color: #555;
             min-height: 1.2rem;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             padding: 0 5px;
             line-height: 1.4;
         }
@@ -89,20 +89,28 @@
         .title-text { font-size: 0.8rem; font-weight: 500; color: #666; letter-spacing: 0.5px; }
 
         /* ⏳ リアルタイムカウントダウン */
-        .days-box { font-size: 2rem; font-weight: 800; color: var(--accent-color); line-height: 1.2; margin: 4px 0 10px 0; }
+        .days-box { font-size: 2rem; font-weight: 800; color: var(--accent-color); line-height: 1.2; margin: 4px 0 8px 0; }
         .unit { font-size: 1.2rem; font-weight: 600; color: var(--text-color); }
         
-        .target-date { font-size: 0.7rem; color: #777; margin-bottom: 10px; font-weight: 500; }
+        .target-date { font-size: 0.7rem; color: #777; margin-bottom: 8px; font-weight: 500; }
         
-        /* ⚙️ 設定エリアのスタイル */
-        .settings-wrapper { margin-top: 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        /* ⚙️ 常時表示される入力エリアのスタイル */
+        .settings-wrapper { 
+            margin-top: 8px; 
+            width: 100%; 
+            background: rgba(255, 255, 255, 0.5); 
+            padding: 10px 8px; 
+            border-radius: 16px; 
+            box-sizing: border-box;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
         .input-group { display: flex; gap: 4px; justify-content: center; width: 100%; }
-        input[type="date"], input[type="text"] { padding: 6px 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.85rem; color: var(--text-color); outline: none; text-align: center; box-sizing: border-box; }
+        input[type="date"], input[type="text"] { padding: 6px 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.8rem; color: var(--text-color); outline: none; text-align: center; box-sizing: border-box; }
         input[type="text"] { width: 48%; }
         input[type="date"] { width: 98%; }
         
-        button { background: #ff922b; border: none; padding: 6px 14px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin: 2px; font-size: 0.75rem; transition: background 0.2s; }
-        button:active { background: #f76707; }
+        .save-btn { background: #ff922b; border: none; padding: 6px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin-top: 8px; font-size: 0.75rem; width: 98%; transition: background 0.2s; }
+        .save-btn:active { background: #f76707; }
         
         #image-input { display: none; }
         .sub-btn { background: #8e8e93; font-size: 0.65rem; padding: 4px 10px; display: inline-block; }
@@ -137,19 +145,17 @@
     
     <div class="days-box" id="countdown-fluid">?-日 --:--:--</div>
     
-    <div class="target-date" id="target-date-display">設定から名前と日付を入力してください</div>
+    <div class="target-date" id="target-date-display">名前と予定日を入力して保存してください</div>
     
     <div class="settings-wrapper">
-        <div id="settings-inputs" style="display:none; width: 100%;">
-            <div class="input-group" style="margin-bottom: 6px;">
-                <input type="text" id="boyfriend-name-input" placeholder="彼氏の名前">
-                <input type="text" id="girlfriend-name-input" placeholder="彼女の名前">
-            </div>
-            <div class="input-group">
-                <input type="date" id="date-input">
-            </div>
+        <div class="input-group" style="margin-bottom: 6px;">
+            <input type="text" id="boyfriend-name-input" placeholder="彼氏の名前">
+            <input type="text" id="girlfriend-name-input" placeholder="彼女の名前">
         </div>
-        <button id="setup-btn" onclick="toggleSettings()">設定を開く</button>
+        <div class="input-group">
+            <input type="date" id="date-input">
+        </div>
+        <button class="save-btn" onclick="saveSettingsData()">設定を保存する</button>
     </div>
     
     <div style="margin-top: 8px;">
@@ -174,7 +180,7 @@
             bgImages = JSON.parse(savedImagesJSON);
         }
     } catch(e) {
-        console.error("ストレージ読み込み失敗:", e);
+        console.error(e);
     }
     
     var currentSlideIndex = 0;
@@ -185,7 +191,7 @@
     ];
     var slideshowInterval;
 
-    // 🌟 彼女視点メッセージ（彼氏の名前 {boy} を一切排除した、安全で一途な文章）
+    // 彼女視点のメッセージテンプレート
     var mondayMessages = [
         "新しい一週間が始まったね。無理せずマイペースにいこう！☕️",
         "月曜日お疲れ様！会える日にまた一歩近づいたよ。"
@@ -230,7 +236,6 @@
         var randomIndex = Math.floor(Math.random() * messageList.length);
         var rawMessage = messageList[randomIndex];
         
-        // 🌟 彼女の名前 {girl} のみを変換（{boy} を含まないため不具合も完全に起きません）
         var formattedMessage = String(rawMessage).split("{girl}").join(girlfriendName);
         
         document.getElementById('random-message').innerText = formattedMessage;
@@ -252,7 +257,7 @@
             bgm.play().then(function() {
                 audioStarted = true;
             }).catch(function(err) {
-                console.log("Audio play blocked by browser:", err);
+                console.log(err);
             });
         }
     }
@@ -316,7 +321,7 @@
         
         if (!targetDateStr) {
             displayElement.innerText = '?-日 --:--:--';
-            dateDisplay.innerText = '設定を開いて名前と日付を入力してください';
+            dateDisplay.innerText = '名前と予定日を入力して保存してください';
             return;
         }
 
@@ -332,7 +337,7 @@
 
             var hrs = ('0' + diffHours).slice(-2);
             var mins = ('0' + diffMinutes).slice(-2);
-            var secs = ('0' + diffSeconds).slice(-2);
+            secs = ('0' + diffSeconds).slice(-2);
 
             displayElement.innerHTML = diffDays + '<span class="unit">日</span> ' + hrs + ':' + mins + ':' + secs;
             dateDisplay.innerText = '次のデート：' + targetDateStr.replace(/-/g, '/');
@@ -348,41 +353,29 @@
         }
     }
 
-    function toggleSettings() {
-        var div = document.getElementById('settings-inputs');
-        var btn = document.getElementById('setup-btn');
-        var dateInput = document.getElementById('date-input');
-        var boyIn = document.getElementById('boyfriend-name-input');
-        var girlIn = document.getElementById('girlfriend-name-input');
+    // 🌟 常時出しっぱなしの入力欄から直接保存するだけの超シンプル設計
+    function saveSettingsData() {
+        var dateInput = document.getElementById('date-input').value;
+        var boyIn = document.getElementById('boyfriend-name-input').value.trim();
+        var girlIn = document.getElementById('girlfriend-name-input').value.trim();
 
-        if (!div || !btn) return;
-
-        if (div.style.display === 'none') {
-            div.style.display = 'block';
-            btn.innerText = '決定して保存';
-            if (targetDateStr) dateInput.value = targetDateStr;
-            boyIn.value = boyfriendName === '彼氏' ? '' : boyfriendName;
-            girlIn.value = girlfriendName === '彼女' ? '' : girlfriendName;
-        } else {
-            if (dateInput.value) {
-                targetDateStr = dateInput.value;
-                localStorage.setItem('meetTargetDate', targetDateStr);
-            }
-            if (boyIn.value.trim()) {
-                boyfriendName = boyIn.value.trim();
-                localStorage.setItem('boyfriendName', boyfriendName);
-            }
-            if (girlIn.value.trim()) {
-                girlfriendName = girlIn.value.trim();
-                localStorage.setItem('girlfriendName', girlfriendName);
-            }
-
-            updateCountdownFluid();
-            setRandomMessage();
-
-            div.style.display = 'none';
-            btn.innerText = '設定を変更する';
+        if (dateInput) {
+            targetDateStr = dateInput;
+            localStorage.setItem('meetTargetDate', targetDateStr);
         }
+        if (boyIn) {
+            boyfriendName = boyIn;
+            localStorage.setItem('boyfriendName', boyfriendName);
+        }
+        if (girlIn) {
+            girlfriendName = girlIn;
+            localStorage.setItem('girlfriendName', girlfriendName);
+        }
+
+        // 保存後に即反映
+        updateCountdownFluid();
+        setRandomMessage();
+        alert("設定を保存しました！");
     }
 
     window.onload = function() {
@@ -391,10 +384,10 @@
         updateClocks();
         updateCountdownFluid();
         
-        if (targetDateStr || localStorage.getItem('boyfriendName')) {
-            var btn = document.getElementById('setup-btn');
-            if (btn) btn.innerText = '設定を変更する';
-        }
+        // 保存済みのデータがあれば入力欄に初期表示
+        if (targetDateStr) document.getElementById('date-input').value = targetDateStr;
+        if (boyfriendName !== '彼氏') document.getElementById('boyfriend-name-input').value = boyfriendName;
+        if (girlfriendName !== '彼女') document.getElementById('girlfriend-name-input').value = girlfriendName;
 
         setInterval(function() {
             updateClocks();
