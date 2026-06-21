@@ -9,167 +9,59 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
     <style>
-        :root { --bg-color: #fef6f6; --text-color: #4a4a4a; --accent-color: #ff7b93; }
-        
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            background-color: var(--bg-color); 
-            color: var(--text-color); 
-            display: flex; 
-            flex-direction: column;
-            justify-content: flex-end; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            box-sizing: border-box;
-        }
-
-        .container { 
-            text-align: center; 
-            background: rgba(255, 255, 255, 0.65); 
-            padding: 30px 25px; 
-            border-radius: 24px; 
-            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.08); 
-            width: 85%; 
-            max-width: 350px; 
-            margin-bottom: 40px; 
-            backdrop-filter: blur(10px); 
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        .days-box { font-size: 5rem; font-weight: 800; color: var(--accent-color); line-height: 1; margin: 10px 0; }
-        .unit { font-size: 1.4rem; font-weight: 600; color: var(--text-color); }
-        .target-date { font-size: 0.85rem; color: #555; margin-bottom: 15px; font-weight: 500; }
-        
-        button { background: #ff922b; border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin: 5px; font-size: 0.85rem; transition: background 0.2s; }
-        button:active { background: #f76707; }
-        .date-picker-wrapper { margin-top: 10px; }
+        :root { --bg-color: #fef6f6; --card-bg: #ffffff; --text-color: #4a4a4a; --accent-color: #ff7b93; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { text-align: center; background: var(--card-bg); padding: 40px 30px; border-radius: 24px; box-shadow: 0 10px 30px rgba(255, 123, 147, 0.15); width: 80%; max-width: 350px; }
+        .days-box { font-size: 5.5rem; font-weight: 800; color: var(--accent-color); line-height: 1; margin: 15px 0; }
+        .unit { font-size: 1.5rem; font-weight: 600; color: var(--text-color); }
+        .target-date { font-size: 0.9rem; color: #8e8e93; margin-bottom: 20px; }
+        button { background: #cbd5e1; border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin: 5px; font-size: 0.85rem; transition: background 0.2s; }
+        button:active { background: #94a3b8; }
+        #notification-btn { background: var(--accent-color); }
+        #notification-btn:active { background: #e0637b; }
+        .date-picker-wrapper { margin-top: 15px; }
         input[type="date"] { padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 1rem; color: var(--text-color); outline: none; }
-        
-        #image-input { display: none; }
-        .sub-btn { background: #8e8e93; font-size: 0.75rem; padding: 6px 12px; }
-        .sub-btn:active { background: #636366; }
     </style>
 </head>
-<body onclick="initAudio()">
-
+<body>
 <div class="container">
-    <div>会えるまで</div>
-    <div class="days-box"><span id="days-count">?</span><span class="unit" id="days-unit" style="display:none;">日</span></div>
+    <div>彼女に会えるまで</div>
+    <div class="days-box"><span id="days-count">--</span><span class="unit" id="days-unit" style="display:none;">日</span></div>
     <div class="target-date" id="target-date-display">予定が設定されていません</div>
     <div class="date-picker-wrapper"><input type="date" id="date-input" style="display:none;"></div>
-    
     <button id="setup-btn" onclick="toggleDatePicker()">日付を設定する</button>
-    
-    <div style="margin-top: 12px;">
-        <label for="image-input" class="sub-btn" style="color:white; font-weight:bold; border-radius:20px; padding:6px 12px; cursor:pointer; background:#8e8e93; font-size:0.75rem;">背景画像を選ぶ</label>
-        <input type="file" id="image-input" accept="image/*" onchange="loadImage(event)">
-    </div>
+    <button id="notification-btn" onclick="requestNotificationPermission()">通知を許可する</button>
 </div>
-
-<audio id="bgm" src="bgm.mp3" loop></audio>
-
 <script>
-    var targetDateStr = localStorage.getItem('meetTargetDate'); 
-    var audioStarted = false;
-
-    // 🌟 画面タップ時に音楽を再生する関数
-    function initAudio() {
-        if (audioStarted) return;
-        var bgm = document.getElementById('bgm');
-        bgm.play().then(function() {
-            audioStarted = true;
-        }).catch(function(err) {
-            console.log("Audio play blocked:", err);
+    let targetDateStr = localStorage.getItem('meetTargetDate'); 
+    function updateCountdown() {
+        const countElement = document.getElementById('days-count');
+        const unitElement = document.getElementById('days-unit');
+        const dateDisplay = document.getElementById('target-date-display');
+        if (!targetDateStr) { countElement.innerText = '?'; unitElement.style.display = 'none'; dateDisplay.innerText = '下の手続きから、会える日を設定してください'; return; }
+        const now = new Date(); const target = new Date(targetDateStr + 'T00:00:00'); const diffTime = target - now; const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        unitElement.style.display = 'inline';
+        if (diffDays > 0) { countElement.innerText = diffDays; dateDisplay.innerText = `次のデート：${targetDateStr.replace(/-/g, '/')}`; }
+        else if (diffDays === 0) { countElement.innerText = '0'; dateDisplay.innerText = 'ついに今日会える日です！❤️'; }
+        else { countElement.innerText = '-'; unitElement.style.display = 'none'; dateDisplay.innerText = '新しい予定を設定してください'; }
+    }
+    function toggleDatePicker() {
+        const input = document.getElementById('date-input'); const btn = document.getElementById('setup-btn');
+        if (input.style.display === 'none') { input.style.display = 'inline-block'; btn.innerText = '決定'; if(targetDateStr) input.value = targetDateStr; }
+        else { if (input.value) { targetDateStr = input.value; localStorage.setItem('meetTargetDate', targetDateStr); updateCountdown(); } input.style.display = 'none'; btn.innerText = '日付を変更する'; }
+    }
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').then(() => console.log('SW Registered')).catch(err => console.error(err)); }
+    function requestNotificationPermission() {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                alert('通知が許可されました！'); document.getElementById('notification-btn').style.display = 'none';
+                setTimeout(() => { navigator.serviceWorker.ready.then(reg => { reg.showNotification('カウントダウンアプリ', { body: '通知テスト成功！二人が会える日まであと少しです。', icon: 'icon.png' }); }); }, 3000);
+            }
         });
     }
-
-    // 起動時に保存された画像を読み込む
-    var savedImage = localStorage.getItem('bgImage');
-    if (savedImage) {
-        document.body.style.backgroundImage = "url('" + savedImage + "')";
-    }
-
-    function loadImage(event) {
-        var file = event.target.files[0];
-        if (file) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var base64Image = e.target.result;
-                try {
-                    localStorage.setItem('bgImage', base64Image);
-                    document.body.style.backgroundImage = "url('" + base64Image + "')";
-                } catch (error) {
-                    alert("画像サイズが大きすぎるみたい。その画像のスクショを使うと容量が小さくなるからやってみて！");
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
-    function updateCountdown() {
-        var countElement = document.getElementById('days-count');
-        var unitElement = document.getElementById('days-unit');
-        var dateDisplay = document.getElementById('target-date-display');
-        var btn = document.getElementById('setup-btn');
-        
-        if (!targetDateStr) {
-            countElement.innerText = '?';
-            unitElement.style.display = 'none';
-            dateDisplay.innerText = '下の手続きから、会える日を設定してね';
-            btn.innerText = '日付を設定する';
-            return;
-        }
-
-        var now = new Date();
-        var target = new Date(targetDateStr.replace(/-/g, '/') + ' 00:00:00');
-        var diffTime = target.getTime() - now.getTime();
-        var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        unitElement.style.display = 'inline';
-        btn.innerText = '日付を変更する';
-
-        if (diffDays > 0) {
-            countElement.innerText = diffDays;
-            dateDisplay.innerText = '次に会える日：' + targetDateStr.replace(/-/g, '/');
-        } else if (diffDays === 0) {
-            countElement.innerText = '0';
-            dateDisplay.innerText = 'ついに今日会えるね☺️';
-        } else {
-            countElement.innerText = '-';
-            unitElement.style.display = 'none';
-            dateDisplay.innerText = '新しい予定を設定してください';
-        }
-    }
-
-    function toggleDatePicker() {
-        var input = document.getElementById('date-input');
-        var btn = document.getElementById('setup-btn');
-        if (input.style.display === 'none') {
-            input.style.display = 'inline-block';
-            btn.innerText = '決定';
-            if (targetDateStr) input.value = targetDateStr;
-        } else {
-            if (input.value) {
-                targetDateStr = input.value;
-                localStorage.setItem('meetTargetDate', targetDateStr);
-                updateCountdown();
-            }
-            input.style.display = 'none';
-            if (targetDateStr) {
-                btn.innerText = '日付を変更する';
-            } else {
-                btn.innerText = '日付を設定する';
-            }
-        }
-    }
-
-    window.onload = function() {
-        updateCountdown();
-    };
+    updateCountdown();
+    if (targetDateStr) { document.getElementById('setup-btn').innerText = '日付を変更する'; }
+    if (Notification.permission === 'granted') { document.getElementById('notification-btn').style.display = 'none'; }
 </script>
 </body>
 </html>
