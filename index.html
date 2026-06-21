@@ -140,7 +140,7 @@
 
     <div class="message-area" id="random-message">✨</div>
 
-    <div class="title-text" id="app-title">彼女に会えるまで</div>
+    <div class="title-text" id="app-title">会えるまで</div>
     
     <div class="days-box" id="countdown-fluid">?-日 --:--:--</div>
     
@@ -148,8 +148,7 @@
     
     <div class="settings-wrapper" id="settings-area">
         <div class="input-group" style="margin-bottom: 6px;">
-            <input type="text" id="boyfriend-name-input" placeholder="彼氏の名前">
-            <input type="text" id="girlfriend-name-input" placeholder="彼女の名前">
+            <input type="text" id="girlfriend-name-input" placeholder="あなたの名前">
         </div>
         <div class="input-group">
             <input type="date" id="date-input">
@@ -193,29 +192,44 @@
     // 彼女視点のメッセージテンプレート
     var mondayMessages = [
         "新しい一週間が始まったね。無理せずマイペースにいこう！☕️",
-        "月曜日お疲れ様！会える日にまた一歩近づいたよ。"
+        "{girl}、大好きだよ☺️",
+        "不安なことは一緒に乗り越えよう！",
+        "{girl}、可愛い！",
+        "辛いことがあったら、遠慮せず話してね。一緒に悩もう！",
+        "月曜日お疲れ様！{girl}に会える日にまた一歩近づいた！"
     ];
     var tuesdayMessages = [
-        "火曜日もお疲れ様！ロンドンの{girl}は今、夜の準備中だよ📮",
-        "今日も一日よく頑張りました！{girl}から大きなハグを送るね🫂"
+        "{girl}、火曜日もお疲れ様！ロンドンの{girl}は今何時かな？📮",
+        "{girl}、大好きだよ☺️",
+        "色々一緒に乗り越えよう！",
+        "今日も一日よく頑張りました！{girl}へハグを送るね🫂",
+        "{girl}は十分頑張ってる！たまにはサボっちゃえ笑"
     ];
     var wednesdayMessages = [
-        "水曜日、一週間の折り返しだね！あと半分一緒に頑張ろう。",
-        "お仕事お疲れ様。{girl}を想いながら、ゆっくり休んでね。"
+        "水曜日、一週間の折り返しだね！あと半分一緒に頑張ろう！",
+        "{girl}、大好き☺️",
+        "{girl}、可愛い！",
+        "お仕事お疲れ様。ゆっくり休んでね💤"
     ];
     var thursdayMessages = [
-        "木曜日お疲れ様！あと少しで週末だね。ワクワク✨",
-        "いつも一生懸命頑張る姿、{girl}は本当に尊敬してるよ。"
+        "木曜日お疲れ様！あと少しで週末だね、{boy}。ワクワク✨",
+        "{girl}、大好き過ぎる☺️",
+        "{girl}、可愛い！",
+        "辛いことがあったら、遠慮せず話してね。一緒に悩もう！"
+        "いつも一生懸命頑張る{girl}のこと、本当に尊敬してるよ。"
     ];
     var fridayMessages = [
-        "金曜日お疲れ様！やっと週末だ〜！本当に頑張ったね🎉",
-        "今週も仕事やりきった！{girl}と次にやりたいことを妄想中…❤️"
+        "{girl}、金曜日お疲れ様！TGIF！本当に頑張ったね🎉",
+        "{girl}、大好き〜☺️",
+        "飲み過ぎには注意だよ〜。俺も気をつけます！！",
+        "卑しい男は近づけません！ｼｯｼｯ🧹",
+        "今週も仕事やりきった！お疲れ様！"
     ];
     var weekendMessages = [
         "素敵な週末になりますように！お出かけ楽しんでね🌿",
-        "ゆっくり休めてる？{girl}と一緒に今週もリフレッシュしよう。💤",
-        "離れていても、二人の心はいつもすぐ隣にいるよ。",
-        "次に会えたら行きたい場所、{girl}がたくさん見つけたんだ！"
+        "ゆっくり休めてる？{girl}と一緒に今週もリフレッシュしよう💤",
+        "離れていても、俺と{girl}の心はいつも一緒だよ！",
+        "お先に月曜日迎えとくね😔"
     ];
 
     function setRandomMessage() {
@@ -237,7 +251,6 @@
         var formattedMessage = String(rawMessage).split("{girl}").join(girlfriendName);
         
         document.getElementById('random-message').innerText = formattedMessage;
-        document.getElementById('app-title').innerText = girlfriendName + "に会えるまで";
     }
 
     function updateClocks() {
@@ -287,7 +300,7 @@
                             localStorage.setItem('bgImagesSlideshow', JSON.stringify(bgImages));
                             startSlideshow();
                         } catch (error) {
-                            alert("画質が大きすぎます。縮小した画像をお試しください。");
+                            alert("画質が大きすぎるみたい。載せたい画像をスクショして、それ使ってみて！。");
                         }
                     }
                 };
@@ -316,10 +329,10 @@
             var diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
             var diffSeconds = Math.floor((diffTime % (1000 * 60)) / (1000));
             displayElement.innerHTML = diffDays + '<span class="unit">日</span> ' + ('0' + diffHours).slice(-2) + ':' + ('0' + diffMinutes).slice(-2) + ':' + ('0' + diffSeconds).slice(-2);
-            dateDisplay.innerText = '次のデート：' + targetDateStr.replace(/-/g, '/');
+            dateDisplay.innerText = '次に会える日：' + targetDateStr.replace(/-/g, '/');
         } else {
             displayElement.innerText = 'Today! ❤️';
-            dateDisplay.innerText = 'ついに今日会える日です！';
+            dateDisplay.innerText = 'ついに今日会えるね☺️';
         }
     }
 
