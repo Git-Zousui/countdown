@@ -106,7 +106,7 @@
         }
         .input-group { display: flex; gap: 4px; justify-content: center; width: 100%; }
         input[type="date"], input[type="text"] { padding: 6px 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.8rem; color: var(--text-color); outline: none; text-align: center; box-sizing: border-box; }
-        input[type="text"] { width: 48%; }
+        input[type="text"] { width: 98%; }
         input[type="date"] { width: 98%; }
         
         .save-btn { background: #ff922b; border: none; padding: 6px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin-top: 8px; font-size: 0.75rem; width: 98%; }
@@ -168,7 +168,6 @@
 
 <script>
     var targetDateStr = localStorage.getItem('meetTargetDate') || ''; 
-    var boyfriendName = localStorage.getItem('boyfriendName') || '彼氏';
     var girlfriendName = localStorage.getItem('girlfriendName') || '彼女';
     var audioStarted = false;
     
@@ -212,10 +211,10 @@
         "お仕事お疲れ様。ゆっくり休んでね💤"
     ];
     var thursdayMessages = [
-        "木曜日お疲れ様！あと少しで週末だね、{boy}。ワクワク✨",
+        "木曜日お疲れ様！あと少しで週末だね。ワクワク✨",
         "{girl}、大好き過ぎる☺️",
         "{girl}、可愛い！",
-        "辛いことがあったら、遠慮せず話してね。一緒に悩もう！"
+        "辛いことがあったら、遠慮せず話してね。一緒に悩もう！",
         "いつも一生懸命頑張る{girl}のこと、本当に尊敬してるよ。"
     ];
     var fridayMessages = [
@@ -336,25 +335,20 @@
         }
     }
 
-    // 🌟 【改良】保存したら、入力欄を隠して「変更ボタン」を出す
     function saveSettingsData() {
         var dateInput = document.getElementById('date-input').value;
-        var boyIn = document.getElementById('boyfriend-name-input').value.trim();
         var girlIn = document.getElementById('girlfriend-name-input').value.trim();
 
         if (dateInput) { targetDateStr = dateInput; localStorage.setItem('meetTargetDate', targetDateStr); }
-        if (boyIn) { boyfriendName = boyIn; localStorage.setItem('boyfriendName', boyfriendName); }
         if (girlIn) { girlfriendName = girlIn; localStorage.setItem('girlfriendName', girlfriendName); }
 
         updateCountdownFluid();
         setRandomMessage();
 
-        // 枠を完全に消して、代わりに「変更ボタン」をひょっこり出す
         document.getElementById('settings-area').style.display = 'none';
         document.getElementById('edit-open-btn').style.display = 'inline-block';
     }
 
-    // 「設定を変更する」を押したら、また入力欄を再表示させる
     function openSettingsArea() {
         document.getElementById('settings-area').style.display = 'block';
         document.getElementById('edit-open-btn').style.display = 'none';
@@ -367,10 +361,8 @@
         updateCountdownFluid();
         
         if (targetDateStr) document.getElementById('date-input').value = targetDateStr;
-        if (boyfriendName !== '彼氏') document.getElementById('boyfriend-name-input').value = boyfriendName;
         if (girlfriendName !== '彼女') document.getElementById('girlfriend-name-input').value = girlfriendName;
 
-        // 🌟 起動した時点で、すでに過去のデータが入っていれば最初から入力欄を非表示にする（スッキリ！）
         if (targetDateStr && girlfriendName !== '彼女') {
             document.getElementById('settings-area').style.display = 'none';
             document.getElementById('edit-open-btn').style.display = 'inline-block';
