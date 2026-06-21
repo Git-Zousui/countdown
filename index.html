@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>会える日まで</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <style>
+        :root { --bg-color: #fef6f6; --card-bg: #ffffff; --text-color: #4a4a4a; --accent-color: #ff7b93; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { text-align: center; background: var(--card-bg); padding: 40px 30px; border-radius: 24px; box-shadow: 0 10px 30px rgba(255, 123, 147, 0.15); width: 80%; max-width: 350px; }
+        .days-box { font-size: 5.5rem; font-weight: 800; color: var(--accent-color); line-height: 1; margin: 15px 0; }
+        .unit { font-size: 1.5rem; font-weight: 600; color: var(--text-color); }
+        .target-date { font-size: 0.9rem; color: #8e8e93; margin-bottom: 20px; }
+        button { background: #cbd5e1; border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; margin: 5px; font-size: 0.85rem; transition: background 0.2s; }
+        button:active { background: #94a3b8; }
+        #notification-btn { background: var(--accent-color); }
+        #notification-btn:active { background: #e0637b; }
+        .date-picker-wrapper { margin-top: 15px; }
+        input[type="date"] { padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 1rem; color: var(--text-color); outline: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div>彼女に会えるまで</div>
+    <div class="days-box"><span id="days-count">--</span><span class="unit" id="days-unit" style="display:none;">日</span></div>
+    <div class="target-date" id="target-date-display">予定が設定されていません</div>
+    <div class="date-picker-wrapper"><input type="date" id="date-input" style="display:none;"></div>
+    <button id="setup-btn" onclick="toggleDatePicker()">日付を設定する</button>
+    <button id="notification-btn" onclick="requestNotificationPermission()">通知を許可する</button>
+</div>
+<script>
+    let targetDateStr = localStorage.getItem('meetTargetDate'); 
+    function updateCountdown() {
+        const countElement = document.getElementById('days-count');
+        const unitElement = document.getElementById('days-unit');
+        const dateDisplay = document.getElementById('target-date-display');
+        if (!targetDateStr) { countElement.innerText = '?'; unitElement.style.display = 'none'; dateDisplay.innerText = '下の手続きから、会える日を設定してください'; return; }
+        const now = new Date(); const target = new Date(targetDateStr + 'T00:00:00'); const diffTime = target - now; const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        unitElement.style.display = 'inline';
+        if (diffDays > 0) { countElement.innerText = diffDays; dateDisplay.innerText = `次のデート：${targetDateStr.replace(/-/g, '/')}`; }
+        else if (diffDays === 0) { countElement.innerText = '0'; dateDisplay.innerText = 'ついに今日会える日です！❤️'; }
+        else { countElement.innerText = '-'; unitElement.style.display = 'none'; dateDisplay.innerText = '新しい予定を設定してください'; }
+    }
+    function toggleDatePicker() {
+        const input = document.getElementById('date-input'); const btn = document.getElementById('setup-btn');
+        if (input.style.display === 'none') { input.style.display = 'inline-block'; btn.innerText = '決定'; if(targetDateStr) input.value = targetDateStr; }
+        else { if (input.value) { targetDateStr = input.value; localStorage.setItem('meetTargetDate', targetDateStr); updateCountdown(); } input.style.display = 'none'; btn.innerText = '日付を変更する'; }
+    }
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').then(() => console.log('SW Registered')).catch(err => console.error(err)); }
+    function requestNotificationPermission() {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                alert('通知が許可されました！'); document.getElementById('notification-btn').style.display = 'none';
+                setTimeout(() => { navigator.serviceWorker.ready.then(reg => { reg.showNotification('カウントダウンアプリ', { body: '通知テスト成功！二人が会える日まであと少しです。', icon: 'icon.png' }); }); }, 3000);
+            }
+        });
+    }
+    updateCountdown();
+    if (targetDateStr) { document.getElementById('setup-btn').innerText = '日付を変更する'; }
+    if (Notification.permission === 'granted') { document.getElementById('notification-btn').style.display = 'none'; }
+</script>
+</body>
+</html>
